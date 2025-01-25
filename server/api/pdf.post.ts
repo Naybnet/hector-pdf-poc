@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { permissions } from '~~/modules/permissions'
+import { generatePdf } from '../services/generate-pdf'
+import { permissions } from '~~/domains/permissions'
 
 const inputSchema = z.object({
   name: z.string().default('sample.pdf'),
@@ -8,7 +9,7 @@ const inputSchema = z.object({
 
 export type InputSchema = z.infer<typeof inputSchema>
 
-export default defineEventHandler<{ body: InputSchema }>(async (event) => {
+export default defineEventHandler(async (event) => {
   // Schema validation
   const result = await readValidatedBody(event, body => inputSchema.safeParse(body))
 
@@ -22,5 +23,9 @@ export default defineEventHandler<{ body: InputSchema }>(async (event) => {
     throw createError({ status: 403, statusMessage: 'forbidden', message: 'Request failed due to insufficient permissions' })
   }
 
-  return { status: true, data }
+  const buffer = await generatePdf(data.name)
+  setHeader(event, 'Content-Disposition', `filename=${data.name}`)
+  setHeader(event, 'Content-Type', 'application/pdf')
+
+  return buffer
 })

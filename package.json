@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "nuxt": "^3.15.2",
+    "playwright": "^1.50.0",
     "vue": "latest",
     "vue-router": "latest",
     "zod": "^3.24.1"
